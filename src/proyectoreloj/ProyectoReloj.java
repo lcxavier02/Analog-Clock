@@ -22,7 +22,7 @@ public class ProyectoReloj extends JFrame implements Runnable {
         try { 
   
             // Animation delay is 1000 milliseconds 
-            Thread.sleep(1); 
+            Thread.sleep(20); 
         } 
         catch (InterruptedException e) { 
             e.printStackTrace(); 
@@ -77,6 +77,8 @@ public class ProyectoReloj extends JFrame implements Runnable {
         g.drawString("9", centerX - radius + 10, centerY + 5); 
         g.drawString("6", centerX - 3, centerY + radius - 5); 
         g.drawString("3", centerX + radius - 15, centerY + 5); 
+        
+        //((Graphics2D) g).setStroke(new BasicStroke(2));
 
         // Declaring variables to be used 
         double angle; 
@@ -115,7 +117,7 @@ public class ProyectoReloj extends JFrame implements Runnable {
         y = (int)(Math.sin(angle) * (radius - 60)); 
 
         // Black color hour hand 
-        g.setColor(Color.black); 
+        g.setColor(Color.black);
         g.drawLine(centerX, centerY, centerX + x, centerY - y);
     }
     
