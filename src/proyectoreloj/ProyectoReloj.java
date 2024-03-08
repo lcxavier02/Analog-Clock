@@ -7,7 +7,9 @@ import java.util.*;
 public class ProyectoReloj extends JFrame implements Runnable {
     private Thread thread;
     private Image offScreenImage;
+    private Image backgroundImage;
     private Graphics offScreenGraphics;
+    private Font font = new Font("Arial", Font.PLAIN, 18);;
     
     @Override
     public void run() {
@@ -19,9 +21,7 @@ public class ProyectoReloj extends JFrame implements Runnable {
     
     private void delayAnimation() 
     { 
-        try { 
-  
-            // Animation delay is 1000 milliseconds 
+        try {
             Thread.sleep(20); 
         } 
         catch (InterruptedException e) { 
@@ -37,19 +37,29 @@ public class ProyectoReloj extends JFrame implements Runnable {
             offScreenGraphics = offScreenImage.getGraphics();
         }
         
-        // Draw on the off-screen image
+        drawBackground(offScreenGraphics);
         drawClock(offScreenGraphics);
         
-        // Draw the off-screen image to the screen
         g.drawImage(offScreenImage, 0, 0, null);
     }
     
+    private void drawBackground(Graphics g) {
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
+    
     private void drawClock(Graphics g) {
-        // Clear the background
-        g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth(), getHeight());
+        // Center and clock radius
+        int centerX = getWidth() / 2;
+        int centerY = getHeight() / 2;
+        int radius = Math.min(getWidth(), getHeight()) / 5;
         
-        // Get the system time 
+        // Clock styling
+        int squareSize = radius * 2 + 38;
+        int x = centerX - radius - 19;
+        int y = centerY - radius - 19;
+        // Gte hour from system
         Calendar time = Calendar.getInstance(); 
 
         int hour = time.get(Calendar.HOUR_OF_DAY); 
@@ -57,77 +67,123 @@ public class ProyectoReloj extends JFrame implements Runnable {
         int second = time.get(Calendar.SECOND); 
         int millisecond = time.get(Calendar.MILLISECOND);
 
-        // 12 hour format 
         if (hour > 12) { 
             hour -= 12; 
-        } 
-        
-        // Calculate center of the JFrame
-        int centerX = getWidth() / 2;
-        int centerY = getHeight() / 2;
-
-        // Draw clock body center at (centerX, centerY)
-        int radius = Math.min(getWidth(), getHeight()) / 4;
+        }
         g.setColor(Color.white); 
         g.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2); 
-
-        // Labeling 
-        g.setColor(Color.black); 
-        g.drawString("12", centerX - 7, centerY - radius + 15); 
-        g.drawString("9", centerX - radius + 10, centerY + 5); 
-        g.drawString("6", centerX - 3, centerY + radius - 5); 
-        g.drawString("3", centerX + radius - 15, centerY + 5); 
         
-        //((Graphics2D) g).setStroke(new BasicStroke(2));
+        // Dot in clock's center
+        int circleRadius = 5;
+        g.setColor(Color.black);
+        g.fillOval(centerX - circleRadius, centerY - circleRadius, circleRadius * 2, circleRadius * 2); 
+        
+        // Dot inside previous dot
+        int smallCircleRadius = 3;
+        g.setColor(Color.orange);
+        g.fillOval(centerX - smallCircleRadius, centerY - smallCircleRadius, smallCircleRadius * 2, smallCircleRadius * 2);
 
-        // Declaring variables to be used 
+        // Naming hours
+        g.setColor(Color.black); 
+        g.setFont(font);
+        
+        Graphics2D g2d = (Graphics2D) g.create();
+        
+        ((Graphics2D) g2d).setStroke(new BasicStroke(2));
+        
+        for (int i = 1; i <= 12; i++) {
+            double angle = Math.toRadians(-i * 30 + 90);
+            int xCoord = (int)(Math.cos(angle) * (radius - 30));
+            int yCoord = (int)(Math.sin(angle) * (radius - 30));
+            g2d.drawString(Integer.toString(i), centerX + xCoord - 5, centerY - yCoord + 5);
+        }
+
+        // Lines for seconds
+        for (int i = 0; i < 60; i++) {
+            g2d.setColor(Color.gray); 
+            double angle = Math.toRadians(-i * 6 + 90);
+            int x1 = (int)(Math.cos(angle) * (radius - 5));
+            int y1 = (int)(Math.sin(angle) * (radius - 5));
+            int x2 = (int)(Math.cos(angle) * (radius - 10));
+            int y2 = (int)(Math.sin(angle) * (radius - 10));
+            g2d.drawLine(centerX + x1, centerY - y1, centerX + x2, centerY - y2);
+        }
+        
+        // Lines for hours
+        for (int i = 0; i < 12; i++) {
+            g2d.setColor(Color.black); 
+            ((Graphics2D) g2d).setStroke(new BasicStroke(3));
+            double angle = Math.toRadians(-i * 30);
+            int x1 = (int)(Math.cos(angle) * (radius - 5));
+            int y1 = (int)(Math.sin(angle) * (radius - 5));
+            int x2 = (int)(Math.cos(angle) * (radius - 15));
+            int y2 = (int)(Math.sin(angle) * (radius - 15));
+            g2d.drawLine(centerX + x1, centerY - y1, centerX + x2, centerY - y2);
+        }
+        
+        g2d.dispose();
+
         double angle; 
-        int x, y; 
 
-        // Second hand's angle in Radian 
-        angle = Math.toRadians((15 - second - (millisecond / 1000.0)) * 6); 
-
-        // Position of the second hand 
-        // with length 100 unit 
+        // Seconds
+        ((Graphics2D) g).setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.setColor(Color.orange); 
+        angle = Math.toRadians((15 - second - (millisecond / 1000.0)) * 6);
         x = (int)(Math.cos(angle) * (radius - 20)); 
         y = (int)(Math.sin(angle) * (radius - 20)); 
-
-        // Red color second hand 
-        g.setColor(Color.red); 
+        int startXS = centerX - x / 5; // Posición opuesta en el eje X
+        int startYS = centerY + y / 5; // Posición opuesta en el eje Y
         g.drawLine(centerX, centerY, centerX + x, centerY - y); 
+        g.drawLine(centerX, centerY, startXS, startYS);
 
-        // Minute hand's angle in Radian 
-        angle = Math.toRadians((15 - minute - (second / 60.0)) * 6); 
+        // Minutes
+        float initialStrokeWidth = 3;
+        float finalStrokeWidth = 7;
+        ((Graphics2D) g).setStroke(new BasicStroke(initialStrokeWidth));
+        g.setColor(Color.black); 
+        angle = Math.toRadians((15 - minute - (second / 60.0)) * 6);
+        int minuteHandLength = 90;
+        x = (int)(Math.cos(angle) * minuteHandLength); 
+        y = (int)(Math.sin(angle) * minuteHandLength);
+        int startXMin = centerX + (int)(Math.cos(angle) * circleRadius);
+        int startYMin = centerY - (int)(Math.sin(angle) * circleRadius);
+        int otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
+        int otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
+        g.drawLine(startXMin, startYMin, otherX, otherY); // Delgado hasta otherX, otherY
+        ((Graphics2D) g).setStroke(new BasicStroke(finalStrokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.drawLine(otherX, otherY, centerX + x * 2, centerY - y * 2);
 
-        // Position of the minute hand 
-        // with length 80 unit 
-        x = (int)(Math.cos(angle) * (radius - 40)); 
-        y = (int)(Math.sin(angle) * (radius - 40)); 
-
-        // blue color Minute hand 
-        g.setColor(Color.blue); 
-        g.drawLine(centerX, centerY, centerX + x, centerY - y); 
-
-        // Hour hand's angle in Radian 
-        angle = Math.toRadians((15 - (hour % 12) - (minute / 60.0) - (second / 3600.0)) * 30);
-
-        // Position of the hour hand 
-        // with length 50 unit 
-        x = (int)(Math.cos(angle) * (radius - 60)); 
-        y = (int)(Math.sin(angle) * (radius - 60)); 
-
-        // Black color hour hand 
+        // Hours
+        initialStrokeWidth = 4;
+        finalStrokeWidth = 8;
+        ((Graphics2D) g).setStroke(new BasicStroke(initialStrokeWidth));
         g.setColor(Color.black);
-        g.drawLine(centerX, centerY, centerX + x, centerY - y);
+        angle = Math.toRadians((15 - (hour % 12) - (minute / 60.0) - (second / 3600.0)) * 30);
+        int handLength = 60;
+        x = (int)(Math.cos(angle) * handLength); 
+        y = (int)(Math.sin(angle) * handLength);  
+        int startX = centerX + (int)(Math.cos(angle) * circleRadius);
+        int startY = centerY - (int)(Math.sin(angle) * circleRadius);
+
+        otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
+        otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
+
+        g.drawLine(startX, startY, otherX, otherY); // Delgado hasta otherX, otherY
+        ((Graphics2D) g).setStroke(new BasicStroke(finalStrokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.drawLine(otherX, otherY, centerX + x * 2, centerY - y * 2);
     }
     
     public ProyectoReloj() {
         super("Atomic Clock");
-        setSize(600, 600);
+        setSize(1024, 1024);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setBackground(new Color(50, 50, 50));
+        setResizable(false);
         
+        String currentDirectory = System.getProperty("user.dir");
+        String imagePath = currentDirectory + "/../../NetBeansProjects/Analog-Clock/src/images/watch.jpeg";
+        backgroundImage = new ImageIcon(imagePath).getImage();
         
         thread = new Thread(this);
         thread.start();
