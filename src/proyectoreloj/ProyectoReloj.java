@@ -56,10 +56,9 @@ public class ProyectoReloj extends JFrame implements Runnable {
         int radius = Math.min(getWidth(), getHeight()) / 5;
         
         // Clock styling
-        int squareSize = radius * 2 + 38;
         int x = centerX - radius - 19;
         int y = centerY - radius - 19;
-        // Gte hour from system
+        // Get hour from system
         Calendar time = Calendar.getInstance(); 
 
         int hour = time.get(Calendar.HOUR_OF_DAY); 
@@ -131,8 +130,8 @@ public class ProyectoReloj extends JFrame implements Runnable {
         angle = Math.toRadians((15 - second - (millisecond / 1000.0)) * 6);
         x = (int)(Math.cos(angle) * (radius - 20)); 
         y = (int)(Math.sin(angle) * (radius - 20)); 
-        int startXS = centerX - x / 5; // Posición opuesta en el eje X
-        int startYS = centerY + y / 5; // Posición opuesta en el eje Y
+        int startXS = centerX - x / 5;
+        int startYS = centerY + y / 5;
         g.drawLine(centerX, centerY, centerX + x, centerY - y); 
         g.drawLine(centerX, centerY, startXS, startYS);
 
@@ -147,9 +146,11 @@ public class ProyectoReloj extends JFrame implements Runnable {
         y = (int)(Math.sin(angle) * minuteHandLength);
         int startXMin = centerX + (int)(Math.cos(angle) * circleRadius);
         int startYMin = centerY - (int)(Math.sin(angle) * circleRadius);
-        int otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
-        int otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
-        g.drawLine(startXMin, startYMin, otherX, otherY); // Delgado hasta otherX, otherY
+        
+        int otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20));
+        int otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20));
+        
+        g.drawLine(startXMin, startYMin, otherX, otherY);
         ((Graphics2D) g).setStroke(new BasicStroke(finalStrokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g.drawLine(otherX, otherY, centerX + x * 2, centerY - y * 2);
 
@@ -165,16 +166,16 @@ public class ProyectoReloj extends JFrame implements Runnable {
         int startX = centerX + (int)(Math.cos(angle) * circleRadius);
         int startY = centerY - (int)(Math.sin(angle) * circleRadius);
 
-        otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
-        otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20)); // Punto intermedio para el cambio de grosor
+        otherX = centerX + (int)(Math.cos(angle) * (circleRadius + 20));
+        otherY = centerY - (int)(Math.sin(angle) * (circleRadius + 20));
 
-        g.drawLine(startX, startY, otherX, otherY); // Delgado hasta otherX, otherY
+        g.drawLine(startX, startY, otherX, otherY);
         ((Graphics2D) g).setStroke(new BasicStroke(finalStrokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g.drawLine(otherX, otherY, centerX + x * 2, centerY - y * 2);
     }
     
     public ProyectoReloj() {
-        super("Atomic Clock");
+        super("Clock");
         setSize(1024, 1024);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
